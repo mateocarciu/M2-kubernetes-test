@@ -21,13 +21,13 @@ spec:
         {{- end }}
       initContainers:
       - name: {{ .Values.nginx.initContainerName }}
-        image: {{ .Values.images.orocomerceImage }}:{{ .Values.images.orocomerceImageTag }}
-        command:
+        image: {{ .Values.images.oroImage }}:{{ .Values.images.oroImageTag }}
+        command: 
           - "sh"
           - "-c"
           - "until nc -z {{ .Release.Name }}-app 9000; do echo \"Waiting for php-fpm connection...\"; sleep 1; done && until nc -z {{ .Release.Name }}-websocket 8080; do echo \"Waiting for websocket connection...\"; sleep 1; done && /usr/local/bin/docker-entrypoint.sh nginx-init && sed -i '/gridfs/d; /mongo/d' /opt/oro-nginx/etc/sites-available/*.conf"
         envFrom:
-            - secretRef:
+            - secretRef: 
                 name: {{ .Release.Name }}-secret
         volumeMounts:
           - name: {{ .Release.Name }}-nginx-pvc
@@ -38,13 +38,13 @@ spec:
           {{- end }}
       containers:
       - name: {{ .Values.nginx.defaultContainerName }}
-        image: {{ .Values.images.orocomerceImageBaseRuntime }}:{{ .Values.images.orocomerceImageBaseRuntimeTag }}
+        image: {{ .Values.images.oroImageBaseRuntime }}:{{ .Values.images.oroImageBaseRuntimeTag }}
         ports:
           - containerPort: 80
-        args:
+        args: 
           - "nginx"
         envFrom:
-          - secretRef:
+          - secretRef: 
               name: {{ .Release.Name }}-secret
         resources:
             {{- with .Values.nginx.defaultContainerResource }}
@@ -65,16 +65,12 @@ spec:
             mountPath: /var/www/oro
           - name: {{ .Release.Name }}-app-cache-pvc
             mountPath: /var/www/oro/var/cache
-            readOnly: false
           - name: {{ .Release.Name }}-app-maintenance-pvc
             mountPath: /var/www/oro/var/maintenance
-            readOnly: false
           - name: {{ .Release.Name }}-app-public-pvc
             mountPath: /var/www/oro/public/media
-            readOnly: false
           - name: {{ .Release.Name }}-app-private-pvc
             mountPath: /var/www/oro/var/data
-            readOnly: false
       volumes:
         - name: {{ .Release.Name }}-nginx-pvc
           persistentVolumeClaim:

@@ -19,21 +19,21 @@ spec:
         {{- end }}
       initContainers:
         - name: {{ default "verify-connection" .Values.consumer.initContainerName }}
-          image: {{ .Values.images.orocomerceImageInit }}:{{ .Values.images.orocomerceImageInitTag }}
-          command:
+          image: {{ .Values.images.oroImageInit }}:{{ .Values.images.oroImageInitTag }}
+          command: 
             - "sh"
             - "-c"
             - "until nc -z {{ .Release.Name }}-app 9000; do echo \"Waiting for php-fpm connection...\"; sleep 1; done"
       containers:
         - name: {{ default "consumer" .Values.consumer.defaultContainerName }}
-          image: {{ .Values.images.orocomerceImageBaseRuntime }}:{{ .Values.images.orocomerceImageBaseRuntimeTag }}
-          args:
+          image: {{ .Values.images.oroImageBaseRuntime }}:{{ .Values.images.oroImageBaseRuntimeTag }}
+          args: 
             - "consumer"
           env:
             - name: ORO_LOG_PATH
               value: php://stderr
           envFrom:
-            - secretRef:
+            - secretRef: 
                 name: {{ .Release.Name }}-secret
           resources:
             {{- with .Values.consumer.defaultContainerResource }}

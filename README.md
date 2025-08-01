@@ -21,56 +21,182 @@ Composants :
 - Monitoring (Prometheus, Grafana, etc.)
 - Ingress HTTP/S
 
-## Démarrer le projet
-
-Une fois le répos cloné, placez vous dans le dossier `helm_chart` et exécutez les commandes suivantes :
-
-### Etape 1: Mettre en place le Ingress Nginx
+## 🚀 Démarrage Rapide
 
 ```bash
-kubectl config use-context docker-desktop
+# 1. Démarrer minikube
+minikube start --driver=docker --memory=4096 --cpus=2
+minikube addons enable ingress
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+# 2. Se placer dans le répertoire du projet
+cd helm_chart
 
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
-```
+# 3. Déployer OroCommerce
+helm install orocommerce . --namespace orocommerce --create-namespace
 
-### Etape 2: Deployer OroCommerce
-
-```bash
-helm install -n orocommerce --create-namespace orocommerce .
-```
-
-### Etape 3: Monitoring avec Prometheus et Grafana
-
-```bash
+# 4. Déployer le monitoring
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm install grafana grafana/grafana --namespace monitoring --create-namespace
 helm install prometheus prometheus-community/prometheus --namespace monitoring
-kubectl apply -f helm_chart/monitoring-ingress.yaml
+kubectl apply -f monitoring-ingress.yaml
 
+# 5. Configurer l'accès
+echo "127.0.0.1 oro.demo grafana.local prometheus.local" | sudo tee -a /etc/hosts
+minikube tunnel  # Laisser ce terminal ouvert !
+
+# 6. Accéder aux services
+# OroCommerce: https://oro.demo
+# Grafana: https://grafana.local (admin/[voir commande ci-dessous])
+# Prometheus: https://prometheus.local
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
-### Etage 4: Configuration des hôtes
+## 🏗️ Architecture
+
+### Composants principaux
+
+- **OroCommerce Application** : Application e-commerce PHP-FPM avec Nginx
+- **PostgreSQL** : Base de données en StatefulSet
+- **Nginx** : Serveur web frontend avec SSL/TLS
+- **WebSocket** : Service de communication temps réel
+- **Consumer & Cron** : Services de traitement en arrière-plan
+
+### Monitoring Stack
+
+- **Prometheus** : Collecte des métriques
+- **Grafana** : Visualisation et dashboards
+- **Alertmanager** : Gestion des alertes
+- **Node Exporter** : Métriques système
+- **Kube State Metrics** : Métriques Kubernetes
+
+## 📋 Prérequis
+
+- **Docker** : Version récente installée
+- **Minikube** : v1.30+
+- **Helm** : v3.x
+- **kubectl** : Compatible avec Kubernetes v1.25+
+- **macOS/Linux** : Pour les commandes système
+
+## 🚀 Installation et Démarrage
+
+### 1. Démarrage du cluster Kubernetes
 
 ```bash
-echo "127.0.0.1 orocommerce.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 graphana.local" | sudo tee -a /etc/hosts
-echo "127.0.0.1 prometheus.local" | sudo tee -a /etc/hosts
+# Démarrer minikube avec les ressources nécessaires
+minikube start --driver=docker --memory=4096 --cpus=2
+
+# Activer l'addon ingress-nginx
+minikube addons enable ingress
 ```
 
-## Accéder à l'application
+### 2. Déploiement d'OroCommerce
 
-Pour accéder à l'application il faut passer par les liens suivant:
+```bash
+# Se placer dans le répertoire Helm
+cd helm_chart
 
-- [OroCommerce](http://orocommerce.local)
-- [Grafana](http://grafana.local)
-- [Prometheus](http://prometheus.local)
+# Déployer OroCommerce avec Helm
+helm install orocommerce . --namespace orocommerce --create-namespace
+```
+
+### 3. Configuration du monitoring
+
+```bash
+# Ajouter les repositories Helm
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# Déployer Grafana
+helm install grafana grafana/grafana --namespace monitoring --create-namespace
+
+# Déployer Prometheus
+helm install prometheus prometheus-community/prometheus --namespace monitoring
+
+# Appliquer les ingress de monitoring
+kubectl apply -f monitoring-ingress.yaml
+```
+
+### 4. Configuration de l'accès externe
+
+```bash
+# Démarrer le tunnel minikube (IMPORTANT: ne pas mettre en arrière-plan)
+# Le tunnel doit rester actif dans un terminal dédié
+minikube tunnel
+
+# Dans un NOUVEAU terminal, ajouter les entrées DNS locales
+echo "127.0.0.1 oro.demo grafana.local prometheus.local" | sudo tee -a /etc/hosts
+```
+
+⚠️ **Important** : Le tunnel minikube doit rester actif et demandera le mot de passe sudo. Ne fermez pas ce terminal !
+
+## 🌐 Accès aux Applications
+
+### URLs d'accès
+
+- **OroCommerce** : https://oro.demo
+- **Grafana** : https://grafana.local
+- **Prometheus** : https://prometheus.local
+
+### Identifiants Grafana
+
+- **Utilisateur** : `admin`
+- **Mot de passe** : Récupérer avec la commande :
+  ```bash
+  kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+  ```
+
+### ✅ Test de connectivité
+
+```bash
+# Tester l'accès aux services (doit retourner des codes 200/302)
+curl -k -I https://oro.demo
+curl -k -I https://grafana.local
+curl -k -I https://prometheus.local
+```
+
+## 📊 Vérification du Déploiement
+
+### Vérifier les pods OroCommerce
+
+```bash
+kubectl get pods -n orocommerce
+```
+
+### Vérifier les pods de monitoring
+
+```bash
+kubectl get pods -n monitoring
+```
+
+### Vérifier les ingress
+
+```bash
+kubectl get ingress -A
+```
+
+### Vérifier les services
+
+```bash
+kubectl get services -A
+```
+
+### Vérifier que tout fonctionne
+
+```bash
+# État global du cluster
+kubectl get pods -A | grep -E "(Running|Ready)"
+
+# Test des URLs (doit retourner des codes HTTP valides)
+curl -k -I https://oro.demo
+curl -k -I https://grafana.local
+curl -k -I https://prometheus.local
+
+# Vérifier le tunnel
+ps aux | grep "minikube tunnel"
+```
 
 ## Documentation
 

@@ -1,6 +1,7 @@
+# Configuration NGINX
 nginx:
-  initContainerName: nginx-init
-  initContainerCommand:
+  initContainerName: ngnix-init
+  initContainerCommand: 
   defaultContainerName: nginx
   defaultLivenessProbe:
     httpGet:
@@ -18,11 +19,11 @@ nginx:
     timeoutSeconds: 30
   ingress:
     class: nginx
-    host: orocommerce.local
+    host: oro.demo
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"

@@ -1,3 +1,4 @@
+# Configuration du stockage
 storageClass:
   name: local-storage
   provisioner: kubernetes.io/no-provisioner
@@ -5,58 +6,67 @@ storageClass:
   reclaimPolicy: Retain
 
 persistentVolumes:
-  nodeHostname: docker-desktop
-
+  # Utiliser pour le node affinity du pv
+  nodeHostname: minikube
+  
+  # PV de l'application
   app:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/app
-
+  
+  # PV du cache de l'application
   appCache:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/cache
-
+  
+  # PV de la maintenance de l'application
   appMaintenance:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/maintenance
-
+  
+  # PV des opérations multiples de l'application
   appMultihostOperation:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/multihost-operation
-
+  
+  # PV des dossiers privés de l'application
   appPrivate:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/private
-
+  
+  # PV des dossiers publics de l'application
   appPublic:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
       - ReadOnlyMany
     hostPath: /orocommerce/public
-
+  
+  # PV du NGINX
   nginx:
     capacity: 10Gi
     accessModes:
       - ReadWriteMany
     hostPath: /orocommerce/nginx
-
-  database:
+  
+  # PV PostgreSQL
+  postgre:
     capacity: 10Gi
     accessModes:
       - ReadWriteOncePod
-    hostPath: /orocommerce/database
+    hostPath: /orocommerce/postgre

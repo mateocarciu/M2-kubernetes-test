@@ -19,14 +19,14 @@ spec:
         {{- end }}
       containers:
         - name: {{ default "orocommerce-app" .Values.app.defaultContainerName }}
-          image: {{ .Values.images.orocomerceImageBaseRuntime }}:{{ .Values.images.orocomerceImageBaseRuntimeTag }}
-          args:
+          image: {{ .Values.images.oroImageBaseRuntime }}:{{ .Values.images.oroImageBaseRuntimeTag }}
+          args: 
             - "php-fpm"
           env:
             - name: ORO_LOG_PATH
               value: php://stderr
           envFrom:
-            - secretRef:
+            - secretRef: 
                 name: {{ .Release.Name }}-secret
           ports:
             - containerPort: 9000

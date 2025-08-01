@@ -1,5 +1,6 @@
-database:
-  defaultContainerName: database
+# Configuration PostgreSQL
+postgre:
+  defaultContainerName: postgre
   defaultLivenessProbe:
     exec:
       command:
@@ -26,8 +27,8 @@ database:
     timeoutSeconds: 5
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"

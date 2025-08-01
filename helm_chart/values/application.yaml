@@ -1,52 +1,57 @@
+# Configuration de l'application OroCommerce
 app:
   defaultContainerName: orocommerce-app
   defaultLivenessProbe:
     exec:
       command:
-        - /bin/sh
-        - -c
-        - php-fpm-healthcheck
+          - /bin/sh
+          - -c
+          - php-fpm-healthcheck
     periodSeconds: 5
     initialDelaySeconds: 15
     timeoutSeconds: 30
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"
   hpa:
     minReplicas: 1
     maxReplicas: 2
     averageCpuUtilization: 20
 
+# Configuration du consumer
 consumer:
   initContainerName: verify-connection
   defaultContainerName: consumer
   defaultContainerResource:
     requests:
-      memory: '250Mi'
-      cpu: '250m'
+      memory: "250Mi"
+      cpu: "250m"
     limits:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
 
+# Configuration du cron
 cron:
   initContainerName: verify-connection
   defaultContainerName: cron
   defaultContainerResource:
     requests:
-      memory: '250Mi'
-      cpu: '250m'
+      memory: "250Mi"
+      cpu: "250m"
     limits:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
 
+# Configuration du websocket
 websocket:
   initContainerName: verify-connection
   defaultContainerName: websocket
 
+# Configuration de la restauration
 restore:
   verifyConnectionContainerName: verify-connection
   initContainerName: volume-init
@@ -54,8 +59,8 @@ restore:
   restartPolicy: Never
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"

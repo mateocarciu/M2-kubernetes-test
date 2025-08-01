@@ -1,7 +1,8 @@
+# Configuration des images Docker
 images:
-  orocomerceImage: oroinc/orocommerce-application
-  orocomerceImageTag: 6.1.0
-  orocomerceImageInit: oroinc/orocommerce-application-init-fr
-  orocomerceImageInitTag: 6.1.0
-  orocomerceImageBaseRuntime: oroinc/runtime
-  orocomerceImageBaseRuntimeTag: 6.1-latest
+  oroImage: oroinc/orocommerce-application
+  oroImageTag: 6.1.0
+  oroImageInit: oroinc/orocommerce-application-init-fr
+  oroImageInitTag: 6.1.0
+  oroImageBaseRuntime: oroinc/runtime
+  oroImageBaseRuntimeTag: 6.1-latest

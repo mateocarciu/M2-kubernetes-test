@@ -1,14 +1,22 @@
+# Configuration globale
 global:
+  # Namespace de déploiement
   namespace: orocommerce
+  
+  # Nombre de réplicas par défaut
   replicaCount: 1
+  
+  # Protocole utilisé
   protocol: https
-
+  
+  # Configuration de sécurité globale
   security:
     appSecurityContext:
       runAsUser: 2002
       runAsGroup: 2001
     rootSecurityContext:
       runAsUser: 0
-
+  
+  # Configuration des logs
   logging:
     envLogValue: php://stderr

@@ -9,11 +9,11 @@ spec:
     spec:
       initContainers:
         - name: {{ default "verify-connection" .Values.restore.verifyConnectionContainerName }}
-          image: {{ .Values.images.orocomerceImage }}:{{ .Values.images.orocomerceImageTag }}
-          command: [ "sh", "-c", "until nc -z {{ .Release.Name }}-database 5432; do echo \"Waiting for database connection...\"; sleep 1; done" ]
+          image: {{ .Values.images.oroImage }}:{{ .Values.images.oroImageTag }}
+          command: [ "sh", "-c", "until nc -z {{ .Release.Name }}-postgre 5432; do echo \"Waiting for database connection...\"; sleep 1; done" ]
         - name: {{ .Values.restore.initContainerName }}
-          image: {{ .Values.images.orocomerceImage }}:{{ .Values.images.orocomerceImageTag }}
-          args:
+          image: {{ .Values.images.oroImage }}:{{ .Values.images.oroImageTag }}
+          args: 
             - "-c"
             - "cp -rp /var/www/oro/. /data && chown -R www-data:www-data /data"
           volumeMounts:
@@ -31,15 +31,13 @@ spec:
             {{- end }}
       containers:
         - name: {{ .Values.restore.defaultContainerName }}
-          image: {{ .Values.images.orocomerceImageInit }}:{{ .Values.images.orocomerceImageInitTag }}
-          command:
+          image: {{ .Values.images.oroImageInit }}:{{ .Values.images.oroImageInitTag }}
+          command: 
           - sh
-          - -c
-          - |
-            set -e
-            until nc -z {{ .Release.Name }}-database 5432; do echo "Waiting for database connection..."; sleep 1; done
+          - -c 
+          - "until nc -z {{ .Release.Name }}-postgre 5432; do echo \"Waiting for database connection...\"; sleep 1; done && docker-entrypoint.sh restore && chown -R www-data:www-data /var/www/oro"
           envFrom:
-            - secretRef:
+            - secretRef: 
                 name: {{ .Release.Name }}-secret
           resources:
             {{- with .Values.restore.defaultContainerResource }}

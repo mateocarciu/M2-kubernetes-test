@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-database
+  name: {{ .Release.Name }}-postgre
   labels:
-    app: {{ .Release.Name }}-database
+    app: {{ .Release.Name }}-postgre
   namespace: {{ default "orocommerce" .Values.namespace }}
 spec:
   ports:
   - port: 5432
-    name: database
+    name: postgre
     targetPort: 5432
   selector:
-    app: {{ .Release.Name }}-database
+    app: {{ .Release.Name }}-postgre

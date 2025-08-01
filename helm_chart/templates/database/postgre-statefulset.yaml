@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-database
+  name: {{ .Release.Name }}-postgre
   labels:
-    app: {{ .Release.Name }}-database
+    app: {{ .Release.Name }}-postgre
   namespace: {{ default "orocommerce" .Values.namespace }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-database
-  serviceName: {{ .Release.Name }}-database
+      app: {{ .Release.Name }}-postgre
+  serviceName: {{ .Release.Name }}-postgre
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-database
+        app: {{ .Release.Name }}-postgre
     spec:
       containers:
-        - name: {{ default "database" .Values.database.defaultContainerName }}
+        - name: {{ default "postgre" .Values.postgre.defaultContainerName }}
           image: docker.io/oroinc/pgsql:17.2-alpine
           ports:
           - containerPort: 5432
-            name: database
+            name: postgre
           env:
             - name: POSTGRES_ROOT_PASSWORD
               value: "orodbpass"
@@ -32,32 +32,33 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "orodbpass"
           resources:
-            {{- with .Values.database.defaultContainerResource }}
+            {{- with .Values.postgre.defaultContainerResource }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           volumeMounts:
-            - name: {{ .Release.Name }}-database-pvc
+            - name: {{ .Release.Name }}-postgre-pvc
               mountPath: /var/lib/postgresql/data
           livenessProbe:
-            {{- with .Values.database.defaultLivenessProbe }}
+            {{- with .Values.postgre.defaultLivenessProbe }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           readinessProbe:
-            {{- with .Values.database.defaultReadinessProbe }}
+            {{- with .Values.postgre.defaultReadinessProbe }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ .Release.Name }}-database-pvc
+        name: {{ .Release.Name }}-postgre-pvc
       spec:
         accessModes:
-          {{- with .Values.persistentVolumes.databaseAccessModes }}
+          {{- with .Values.persistentVolumes.postgreAccessModes }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
         resources:
           requests:
-            storage: {{ default "5Gi" .Values.persistentVolumes.databaseCapacity }}
+            storage: {{ default "5Gi" .Values.persistentVolumes.postgreCapacity }}
         storageClassName: {{ default "local-storage" .Values.storageClass.name }}
         selector:
           matchLabels:
-            name: {{ .Release.Name }}-database-pv
+            name: {{ .Release.Name }}-postgre-pv
+        

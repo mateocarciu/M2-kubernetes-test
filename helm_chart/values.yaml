@@ -1,16 +1,51 @@
+# ===============================================
+# OroCommerce Helm Chart - Configuration principale
+# ===============================================
+# 
+# Ce fichier principal importe les configurations depuis 
+# des fichiers spécialisés pour une meilleure organisation.
+#
+# Structure des fichiers de configuration :
+# - values/global.yaml      : Configuration globale
+# - values/images.yaml      : Images Docker
+# - values/storage.yaml     : Stockage et volumes
+# - values/application.yaml : Configuration applicative
+# - values/database.yaml    : Configuration PostgreSQL
+# - values/nginx.yaml       : Configuration NGINX
+#
+# ===============================================
+
+# Import des configurations depuis les fichiers spécialisés
+# Note: Dans Helm, l'import de fichiers YAML multiples n'est pas 
+# natif. Cette structure documumente l'organisation recommandée.
+
+# Configuration globale par défaut (à adapter selon votre environnement)
 global:
   namespace: orocommerce
   replicaCount: 1
   protocol: https
 
-images:
-  orocomerceImage: oroinc/orocommerce-application
-  orocomerceImageTag: 6.1.0
-  orocomerceImageInit: oroinc/orocommerce-application-init-fr
-  orocomerceImageInitTag: 6.1.0
-  orocomerceImageBaseRuntime: oroinc/runtime
-  orocomerceImageBaseRuntimeTag: 6.1-latest
+# Pour utiliser cette structure modulaire, vous pouvez :
+# 1. Merger les fichiers values/*.yaml avant le déploiement
+# 2. Utiliser les valeurs inline ci-dessous
+# 3. Ou passer plusieurs fichiers avec -f à helm install
 
+# ===============================================
+# CONFIGURATION INLINE (temporaire)
+# ===============================================
+# Les valeurs ci-dessous sont temporaires en attendant 
+# la mise en place d'un système de merge automatique
+
+# Configuration des images Docker
+images:
+  oroImage: oroinc/orocommerce-application
+  oroImageTag: 6.1.0
+  oroImageInit: oroinc/orocommerce-application-init-fr
+  oroImageInitTag: 6.1.0
+  oroImageBaseRuntime: oroinc/runtime
+  oroImageBaseRuntimeTag: 6.1-latest
+
+# Configuration de sécurité
 appSecurityContext:
   runAsUser: 2002
   runAsGroup: 2001
@@ -18,8 +53,10 @@ appSecurityContext:
 rootSecurityContext:
   runAsUser: 0
 
+# Configuration des logs
 envLogValue: php://stderr
 
+# Configuration du stockage
 storageClass:
   name: local-storage
   provisioner: kubernetes.io/no-provisioner
@@ -27,56 +64,64 @@ storageClass:
   reclaimPolicy: Retain
 
 persistentVolumes:
-  nodeHostname: docker-desktop
-
+  nodeHostname: minikube
+  # Volumes de l'application
   appCapacity: 10Gi
   appAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appHostPath: /orocommerce/app
-
+  
+  # Cache
   appCacheCapacity: 10Gi
   appCacheAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appCacheHostPath: /orocommerce/cache
-
+  
+  # Maintenance
   appMaintenanceCapacity: 10Gi
   appMaintenanceAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appMaintenanceHostPath: /orocommerce/maintenance
-
+  
+  # Opérations multi-hôtes
   appMultihostOperationCapacity: 10Gi
   appMultihostOperationAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appMultihostOperationHostPath: /orocommerce/multihost-operation
-
+  
+  # Dossiers privés
   appPrivateCapacity: 10Gi
   appPrivateAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appPrivateHostPath: /orocommerce/private
-
+  
+  # Dossiers publics
   appPublicCapacity: 10Gi
   appPublicAccessModes:
     - ReadWriteMany
     - ReadOnlyMany
   appPublicHostPath: /orocommerce/public
-
+  
+  # NGINX
   nginxCapacity: 10Gi
   nginxAccessModes:
     - ReadWriteMany
   nginxHostPath: /orocommerce/nginx
-
-  databaseCapacity: 10Gi
-  databaseAccessModes:
+  
+  # PostgreSQL
+  postgreCapacity: 10Gi
+  postgreAccessModes:
     - ReadWriteOncePod
-  databaseHostPath: /orocommerce/database
+  postgreHostPath: /orocommerce/postgre
 
-database:
-  defaultContainerName: database
+# Configuration PostgreSQL
+postgre:
+  defaultContainerName: postgre
   defaultLivenessProbe:
     exec:
       command:
@@ -103,37 +148,39 @@ database:
     timeoutSeconds: 5
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"
 
+# Configuration de l'application
 app:
   defaultContainerName: orocommerce-app
   defaultLivenessProbe:
     exec:
       command:
-        - /bin/sh
-        - -c
-        - php-fpm-healthcheck
+          - /bin/sh
+          - -c
+          - php-fpm-healthcheck
     periodSeconds: 5
     initialDelaySeconds: 15
     timeoutSeconds: 30
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"
   hpaMinReplicas: 1
   hpaMaxReplicas: 2
   hpaAverageCpuUtilization: 20
 
+# Configuration NGINX
 nginx:
-  initContainerName: nginx-init
-  initContainerCommand:
+  initContainerName: ngnix-init
+  initContainerCommand: 
   defaultContainerName: nginx
   defaultLivenessProbe:
     httpGet:
@@ -150,36 +197,37 @@ nginx:
     periodSeconds: 5
     timeoutSeconds: 30
   ingressClass: nginx
-  ingressHost: orocommerce.local
+  ingressHost: oro.demo
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"
 
+# Configuration des services annexes
 consumer:
   initContainerName: verify-connection
   defaultContainerName: consumer
   defaultContainerResource:
     requests:
-      memory: '250Mi'
-      cpu: '250m'
+      memory: "250Mi"
+      cpu: "250m"
     limits:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
 
 cron:
   initContainerName: verify-connection
   defaultContainerName: cron
   defaultContainerResource:
     requests:
-      memory: '250Mi'
-      cpu: '250m'
+      memory: "250Mi"
+      cpu: "250m"
     limits:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
 
 websocket:
   initContainerName: verify-connection
@@ -192,11 +240,12 @@ restore:
   restartPolicy: Never
   defaultContainerResource:
     requests:
-      memory: '500Mi'
-      cpu: '500m'
+      memory: "500Mi"
+      cpu: "500m"
     limits:
-      memory: '1000Mi'
-      cpu: '1000m'
+      memory: "1000Mi"
+      cpu: "1000m"
 
+# Configuration des secrets
 secrets:
   protocol: https
