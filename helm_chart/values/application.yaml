@@ -1,0 +1,61 @@
+app:
+  defaultContainerName: orocommerce-app
+  defaultLivenessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - php-fpm-healthcheck
+    periodSeconds: 5
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'
+  hpa:
+    minReplicas: 1
+    maxReplicas: 2
+    averageCpuUtilization: 20
+
+consumer:
+  initContainerName: verify-connection
+  defaultContainerName: consumer
+  defaultContainerResource:
+    requests:
+      memory: '250Mi'
+      cpu: '250m'
+    limits:
+      memory: '500Mi'
+      cpu: '500m'
+
+cron:
+  initContainerName: verify-connection
+  defaultContainerName: cron
+  defaultContainerResource:
+    requests:
+      memory: '250Mi'
+      cpu: '250m'
+    limits:
+      memory: '500Mi'
+      cpu: '500m'
+
+websocket:
+  initContainerName: verify-connection
+  defaultContainerName: websocket
+
+restore:
+  verifyConnectionContainerName: verify-connection
+  initContainerName: volume-init
+  defaultContainerName: restore
+  restartPolicy: Never
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'

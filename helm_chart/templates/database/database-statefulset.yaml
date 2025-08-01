@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-database
+  labels:
+    app: {{ .Release.Name }}-database
+  namespace: {{ default "orocommerce" .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-database
+  serviceName: {{ .Release.Name }}-database
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-database
+    spec:
+      containers:
+        - name: {{ default "database" .Values.database.defaultContainerName }}
+          image: docker.io/oroinc/pgsql:17.2-alpine
+          ports:
+          - containerPort: 5432
+            name: database
+          env:
+            - name: POSTGRES_ROOT_PASSWORD
+              value: "orodbpass"
+            - name: POSTGRES_DB
+              value: "orodb"
+            - name: POSTGRES_USER
+              value: "orodbuser"
+            - name: POSTGRES_PASSWORD
+              value: "orodbpass"
+          resources:
+            {{- with .Values.database.defaultContainerResource }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: {{ .Release.Name }}-database-pvc
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            {{- with .Values.database.defaultLivenessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          readinessProbe:
+            {{- with .Values.database.defaultReadinessProbe }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Release.Name }}-database-pvc
+      spec:
+        accessModes:
+          {{- with .Values.persistentVolumes.databaseAccessModes }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        resources:
+          requests:
+            storage: {{ default "5Gi" .Values.persistentVolumes.databaseCapacity }}
+        storageClassName: {{ default "local-storage" .Values.storageClass.name }}
+        selector:
+          matchLabels:
+            name: {{ .Release.Name }}-database-pv

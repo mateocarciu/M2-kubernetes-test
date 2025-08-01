@@ -1,0 +1,202 @@
+global:
+  namespace: orocommerce
+  replicaCount: 1
+  protocol: https
+
+images:
+  orocomerceImage: oroinc/orocommerce-application
+  orocomerceImageTag: 6.1.0
+  orocomerceImageInit: oroinc/orocommerce-application-init-fr
+  orocomerceImageInitTag: 6.1.0
+  orocomerceImageBaseRuntime: oroinc/runtime
+  orocomerceImageBaseRuntimeTag: 6.1-latest
+
+appSecurityContext:
+  runAsUser: 2002
+  runAsGroup: 2001
+
+rootSecurityContext:
+  runAsUser: 0
+
+envLogValue: php://stderr
+
+storageClass:
+  name: local-storage
+  provisioner: kubernetes.io/no-provisioner
+  volumeBindingMode: WaitForFirstConsumer
+  reclaimPolicy: Retain
+
+persistentVolumes:
+  nodeHostname: docker-desktop
+
+  appCapacity: 10Gi
+  appAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appHostPath: /orocommerce/app
+
+  appCacheCapacity: 10Gi
+  appCacheAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appCacheHostPath: /orocommerce/cache
+
+  appMaintenanceCapacity: 10Gi
+  appMaintenanceAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appMaintenanceHostPath: /orocommerce/maintenance
+
+  appMultihostOperationCapacity: 10Gi
+  appMultihostOperationAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appMultihostOperationHostPath: /orocommerce/multihost-operation
+
+  appPrivateCapacity: 10Gi
+  appPrivateAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appPrivateHostPath: /orocommerce/private
+
+  appPublicCapacity: 10Gi
+  appPublicAccessModes:
+    - ReadWriteMany
+    - ReadOnlyMany
+  appPublicHostPath: /orocommerce/public
+
+  nginxCapacity: 10Gi
+  nginxAccessModes:
+    - ReadWriteMany
+  nginxHostPath: /orocommerce/nginx
+
+  databaseCapacity: 10Gi
+  databaseAccessModes:
+    - ReadWriteOncePod
+  databaseHostPath: /orocommerce/database
+
+database:
+  defaultContainerName: database
+  defaultLivenessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - exec pg_isready -U orodbuser -d orodb
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  defaultReadinessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - -e
+        - |
+          exec pg_isready -U orodbuser -d orodb
+    failureThreshold: 6
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'
+
+app:
+  defaultContainerName: orocommerce-app
+  defaultLivenessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - php-fpm-healthcheck
+    periodSeconds: 5
+    initialDelaySeconds: 15
+    timeoutSeconds: 30
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'
+  hpaMinReplicas: 1
+  hpaMaxReplicas: 2
+  hpaAverageCpuUtilization: 20
+
+nginx:
+  initContainerName: nginx-init
+  initContainerCommand:
+  defaultContainerName: nginx
+  defaultLivenessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 30
+  defaultStartupProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 30
+  ingressClass: nginx
+  ingressHost: orocommerce.local
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'
+
+consumer:
+  initContainerName: verify-connection
+  defaultContainerName: consumer
+  defaultContainerResource:
+    requests:
+      memory: '250Mi'
+      cpu: '250m'
+    limits:
+      memory: '500Mi'
+      cpu: '500m'
+
+cron:
+  initContainerName: verify-connection
+  defaultContainerName: cron
+  defaultContainerResource:
+    requests:
+      memory: '250Mi'
+      cpu: '250m'
+    limits:
+      memory: '500Mi'
+      cpu: '500m'
+
+websocket:
+  initContainerName: verify-connection
+  defaultContainerName: websocket
+
+restore:
+  verifyConnectionContainerName: verify-connection
+  initContainerName: volume-init
+  defaultContainerName: restore
+  restartPolicy: Never
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'
+
+secrets:
+  protocol: https

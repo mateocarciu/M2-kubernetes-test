@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - grafana.local
+      secretName: grafana-tls
+  rules:
+    - host: grafana.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - prometheus.local
+      secretName: prometheus-tls
+  rules:
+    - host: prometheus.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-server
+                port:
+                  number: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-tls
+  namespace: monitoring
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURMakNDQWhZQ0NRRDFSRGRUcVhRUDNEQU5CZ2txaGtpRzl3MEJBUXNGQURBNk1Rc3dDUVlEVlFRR0V3SlYKVXpFUU1BNEdBMVVFQ0F3SFJYaGhiWEJzWlRFUU1BNEdBMVVFQnd3SFJYaGhiWEJzWlRFTk1Bc0dBMVVFQ2d3RQpSWGhoYlhCc1pUQWVGdzB5TXpBeE1UQXdNREF3TURCYUZ3MHpNekF4TURjd01EQXdNREJhTURveEN6QUpCZ05WCkJBWVRBbFZUTVJBd0RnWURWUVFJREFkRmVHRnRjR3hsTVJBd0RnWURWUVFIREFkRmVHRnRjR3hsTVEwd0N3WUQKVlFRS0RBUkZlR0Z0Y0d4bE1JWWJNUXNHQTFVRUJNb0JlR0Z0Y0d4bE1JWWJNUXNHQTFVRUJnR0ExaUYyY1d0SQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRRERReTdEcFFKdTNxcWUKLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQ==
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prometheus-tls
+  namespace: monitoring
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURMakNDQWhZQ0NRRDFSRGRUcVhRUDNEQU5CZ2txaGtpRzl3MEJBUXNGQURBNk1Rc3dDUVlEVlFRR0V3SlYKVXpFUU1BNEdBMVVFQ0F3SFJYaGhiWEJzWlRFUU1BNEdBMVVFQnd3SFJYaGhiWEJzWlRFTk1Bc0dBMVVFQ2d3RQpSWGhoYlhCc1pUQWVGdzB5TXpBeE1UQXdNREF3TURCYUZ3MHpNekF4TURjd01EQXdNREJhTURveEN6QUpCZ05WCkJBWVRBbFZUTVJBd0RnWURWUVFJREFkRmVHRnRjR3hsTVJBd0RnWURWUVFIREFkRmVHRnRjR3hsTVEwd0N3WUQKVlFRS0RBUkZlR0Z0Y0d4bE1JWWJNUXNHQTFVRUJNb0JlR0Z0Y0d4bE1JWWJNUXNHQTFVRUJnR0ExaUYyY1d0SQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRRERReTdEcFFKdTNxcWUKLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQ==

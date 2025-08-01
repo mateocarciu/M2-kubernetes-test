@@ -1,0 +1,62 @@
+storageClass:
+  name: local-storage
+  provisioner: kubernetes.io/no-provisioner
+  volumeBindingMode: WaitForFirstConsumer
+  reclaimPolicy: Retain
+
+persistentVolumes:
+  nodeHostname: docker-desktop
+
+  app:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/app
+
+  appCache:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/cache
+
+  appMaintenance:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/maintenance
+
+  appMultihostOperation:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/multihost-operation
+
+  appPrivate:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/private
+
+  appPublic:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+      - ReadOnlyMany
+    hostPath: /orocommerce/public
+
+  nginx:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteMany
+    hostPath: /orocommerce/nginx
+
+  database:
+    capacity: 10Gi
+    accessModes:
+      - ReadWriteOncePod
+    hostPath: /orocommerce/database

@@ -1,0 +1,7 @@
+images:
+  orocomerceImage: oroinc/orocommerce-application
+  orocomerceImageTag: 6.1.0
+  orocomerceImageInit: oroinc/orocommerce-application-init-fr
+  orocomerceImageInitTag: 6.1.0
+  orocomerceImageBaseRuntime: oroinc/runtime
+  orocomerceImageBaseRuntimeTag: 6.1-latest

@@ -1,0 +1,28 @@
+nginx:
+  initContainerName: nginx-init
+  initContainerCommand:
+  defaultContainerName: nginx
+  defaultLivenessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 30
+  defaultStartupProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    timeoutSeconds: 30
+  ingress:
+    class: nginx
+    host: orocommerce.local
+  defaultContainerResource:
+    requests:
+      memory: '500Mi'
+      cpu: '500m'
+    limits:
+      memory: '1000Mi'
+      cpu: '1000m'

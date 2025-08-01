@@ -1,0 +1,8 @@
+.hgignore
+*.bak
+*.swp
+.vscode/
+.DS_Store
+.git/
+values/
+*.tmp

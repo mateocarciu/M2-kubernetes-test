@@ -1,0 +1,14 @@
+global:
+  namespace: orocommerce
+  replicaCount: 1
+  protocol: https
+
+  security:
+    appSecurityContext:
+      runAsUser: 2002
+      runAsGroup: 2001
+    rootSecurityContext:
+      runAsUser: 0
+
+  logging:
+    envLogValue: php://stderr
